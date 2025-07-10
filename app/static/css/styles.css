@@ -1,4 +1,3 @@
-/* Custom styles */
 body {
     min-height: 100vh;
     display: flex;
@@ -41,7 +40,6 @@ main {
     background-color: #f8f9fa;
 }
 
-/* Animation for alerts */
 .alert {
     animation: fadeIn 0.5s;
 }
@@ -58,7 +56,6 @@ main {
     }
 }
 
-/* Login Page Specific Styles */
 .login-card {
     max-width: 450px;
     border-radius: 12px;
@@ -82,13 +79,11 @@ main {
     font-size: 0.9rem;
 }
 
-/* Form input focus effects */
 .form-control:focus {
     border-color: #86b7fe;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-/* Responsive adjustments */
 @media (max-width: 576px) {
     .login-card .card-body {
         padding: 1.5rem;

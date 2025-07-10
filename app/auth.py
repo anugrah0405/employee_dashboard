@@ -27,10 +27,8 @@ def login():
             session.permanent = True
             return redirect(url_for('routes.upload'))
         
-        # Only flash message when there's an actual failed attempt
         flash('Invalid username or password', 'danger')
     
-    # No flash messages on GET requests
     return render_template('login.html')
 
 @bp.route('/logout')

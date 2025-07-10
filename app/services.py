@@ -17,22 +17,18 @@ def allowed_file(filename):
 def process_excel_file(file_storage, filename):
     """Process uploaded Excel file with blob storage integration"""
     try:
-        # Validate and save to temp location
         secure_name = secure_filename(filename)
         temp_path = Path(current_app.config['UPLOAD_FOLDER']) / secure_name
         file_storage.save(str(temp_path))
         
-        # Process Excel data
         df = pd.read_excel(temp_path)
         required_columns = ['ID', 'Name', 'Email', 'Department', 'Designation']
         if not all(col in df.columns for col in required_columns):
             raise ValueError("Missing required columns in Excel file")
         
-        # Store in blob storage
         with open(temp_path, 'rb') as f:
             blob_info = MockBlobStorage.upload_file(f, secure_name)
         
-        # Process records
         results = {'created': 0, 'updated': 0, 'errors': []}
         
         for index, row in df.iterrows():
@@ -41,14 +37,12 @@ def process_excel_file(file_storage, filename):
                 employee = Employee.query.filter_by(employee_id=emp_id).first()
                 
                 if employee:
-                    # Update existing
                     employee.name = row['Name']
                     employee.email = row['Email']
                     employee.department = row['Department']
                     employee.designation = row['Designation']
                     results['updated'] += 1
                 else:
-                    # Create new
                     db.session.add(Employee(
                         employee_id=emp_id,
                         name=row['Name'],
