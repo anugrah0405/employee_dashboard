@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-search text-primary me-2"></i>Search Employees
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="department-select" class="form-label fw-bold">Select Department</label>
+                            <select id="department-select" class="form-select select2" style="width: 100%">
+                                <option value="">Select a department...</option>
+                                {% for department in departments %}
+                                <option value="{{ department }}">{{ department }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="employee-results" class="mt-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Please select a department to view employees
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('.select2').select2({
+            placeholder: "Select a department...",
+            allowClear: true,
+            width: '100%',
+            dropdownAutoWidth: true
+        });
+
+        $('#department-select').change(function () {
+            const department = $(this).val();
+            const $results = $('#employee-results');
+
+            if (!department) {
+                $results.html(`
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Please select a department to view employees
+                </div>
+            `);
+                return;
+            }
+
+            $results.html(`
+            <div class="text-center my-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading employees...</p>
+            </div>
+        `);
+
+            $.get('/api/employees', { department: department }, function (data) {
+                if (data.error) {
+                    $results.html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>${data.error}
+                    </div>
+                `);
+                } else if (data.length === 0) {
+                    $results.html(`
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>No employees found in ${department} department
+                    </div>
+                `);
+                } else {
+                    let html = `
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-id-card me-2"></i>ID</th>
+                                    <th><i class="fas fa-user me-2"></i>Name</th>
+                                    <th><i class="fas fa-envelope me-2"></i>Email</th>
+                                    <th><i class="fas fa-briefcase me-2"></i>Designation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                    data.forEach(emp => {
+                        html += `
+                        <tr>
+                            <td>${emp.id}</td>
+                            <td>${emp.name}</td>
+                            <td><a href="mailto:${emp.email}">${emp.email}</a></td>
+                            <td>${emp.designation}</td>
+                        </tr>
+                    `;
+                    });
+
+                    html += `
+                            </tbody>
+                        </table>
+                        <div class="text-muted small mt-2">
+                            Showing ${data.length} employees in ${department}
+                        </div>
+                    </div>
+                `;
+
+                    $results.html(html);
+                }
+            }).fail(function () {
+                $results.html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>Error loading employee data
+                </div>
+            `);
+            });
+        });
+    });
+</script>
+{% endblock %}
